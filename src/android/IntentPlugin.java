@@ -139,14 +139,28 @@ public class IntentPlugin extends CordovaPlugin {
                         items[i].put("htmlText", item.getHtmlText());
                         items[i].put("intent", item.getIntent());
                         items[i].put("text", item.getText());
-                        items[i].put("uri", item.getUri());
+                        Uri uri = item.getUri();
+//                        items[i].put("uri", uri);
 
-                        if(item.getUri() != null) {
-                            String type = cR.getType(item.getUri());
-                            String extension = mime.getExtensionFromMimeType(cR.getType(item.getUri()));
+                        if(uri != null) {
+                            String type = cR.getType(uri);
+                            String extension = mime.getExtensionFromMimeType(type);
 
                             items[i].put("type", type);
                             items[i].put("extension", extension);
+                            //添加真实url
+                            Cursor cursor = null;
+                            try {
+                                String[] proj = { MediaStore.Images.Media.DATA };
+                                cursor = cR.query(uri,  proj, null, null, null);
+                                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                                cursor.moveToFirst();
+                                items[i].put("uri", "file://" + cursor.getString(column_index));
+                            } finally {
+                                if (cursor != null) {
+                                    cursor.close();
+                                }
+                            }
                         }
 
                     } catch (JSONException e) {
