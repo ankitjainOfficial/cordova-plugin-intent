@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="com.napolitano.cordova.plugin.intent"
-        version="0.1.3">
+        id="cordova-plugin-intent"
+        version="1.0.0">
 
-    <name>IntentPlugin</name>
+    <name>AndroidIntentPlugin</name>
     <description>Cordova Plugin for Android to access intent</description>
     <license>MIT</license>
 
-    <repo>https://github.com/napolitano/cordova-plugin-intent</repo>
-    <issue>https://github.com/napolitano/cordova-plugin-intent/issues</issue>
+    <repo>https://github.com/zyf0330/cordova-plugin-intent.git</repo>
 
     <keywords>cordova,intent,share,send,android</keywords>
 
