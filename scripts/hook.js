@@ -10,7 +10,7 @@ module.exports = function(ctx) {
 			deferral.reject(err);
 		} else {
 			var con = data.toString();
-			if (ctx.hook == 'before_plugin_install') {
+			if (ctx.hook == 'before_plugin_install' || ctx.hook == 'before_build') {
 				if (con.indexOf('android.intent.action.SEND') == -1 && con.indexOf('android.intent.action.SEND_MULTIPLE') == -1 ) {
 					var insert =
 						"            <intent-filter android:label='shareintent'>\n" +
@@ -28,7 +28,11 @@ module.exports = function(ctx) {
 						}
 					});
 				} else {
-					deferral.reject(new Error('There is already intent-filter with android.intent.action.SEND or android.intent.action.SEND_MULTIPLE existing.'));
+					if(ctx.hook == 'before_plugin_install'){
+						deferral.reject(new Error('There is already intent-filter with android.intent.action.SEND or android.intent.action.SEND_MULTIPLE existing.'));
+					}else{
+						deferral.resolve();
+					}
 				}
 			} else if (ctx.hook == 'before_plugin_uninstall') {
 				con = con.replace(/<intent-filter android:label='shareintent'>[\sa-zA-Z:='"./<>_*]*<\/intent-filter>\n?/, '');

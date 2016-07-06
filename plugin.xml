@@ -18,8 +18,9 @@
     </engines>
 
     <!-- android -->
-    <platform name="android">    	
+    <platform name="android">       
         <hook type="before_plugin_install" src="scripts/hook.js"></hook>
+        <hook type="before_build" src="scripts/hook.js"></hook>
         <hook type="before_plugin_uninstall" src="scripts/hook.js"></hook>
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="IntentPlugin">
@@ -32,7 +33,7 @@
         </js-module>
 
         <source-file src="src/android/IntentPlugin.java" target-dir="src/com/zyf0330/intent" />
-	
+    
     </platform>
 
 </plugin>
