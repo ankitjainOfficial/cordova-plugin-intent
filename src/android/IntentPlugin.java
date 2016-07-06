@@ -3,7 +3,6 @@ package com.zyf0330.intent;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +18,6 @@ import android.util.Log;
 import android.net.Uri;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.webkit.MimeTypeMap;
 
 import org.apache.cordova.CallbackContext;
@@ -69,7 +67,6 @@ public class IntentPlugin extends CordovaPlugin {
             context.sendPluginResult(new PluginResult(PluginResult.Status.INVALID_ACTION));
             return false;
         }
-
         Intent intent = cordova.getActivity().getIntent();
         context.sendPluginResult(new PluginResult(PluginResult.Status.OK, getIntentJson(intent)));
         return true;
@@ -121,7 +118,6 @@ public class IntentPlugin extends CordovaPlugin {
         JSONObject intentJSON = null;
         ClipData clipData = null;
         JSONObject[] items = null;
-        ContentResolver cR = this.cordova.getActivity().getApplicationContext().getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -140,26 +136,43 @@ public class IntentPlugin extends CordovaPlugin {
                         items[i].put("intent", item.getIntent());
                         items[i].put("text", item.getText());
                         Uri uri = item.getUri();
-//                        items[i].put("uri", uri);
-
                         if(uri != null) {
-                            String type = cR.getType(uri);
-                            String extension = mime.getExtensionFromMimeType(type);
-
+                            String type = null;
+                            String extension = null;
+                            String filePath = null;
+                            //真实路径
+                            if("file".equals(uri.getScheme())){
+                                filePath = uri.getPath();
+                                int index = filePath.lastIndexOf(".");
+                                if(index != -1){
+                                    extension = filePath.substring(index + 1);
+                                    type = mime.getMimeTypeFromExtension(extension);
+                                }
+                            }else if("content".equals(uri.getScheme())){
+                                ContentResolver cR = cordova.getActivity().getApplicationContext().getContentResolver();
+                                type = cR.getType(uri);
+                                extension = mime.getExtensionFromMimeType(type);
+                                Cursor cursor = null;
+                                try {
+                                    String[] proj = { MediaStore.Images.Media.DATA };
+                                    cursor = cR.query(uri,  proj, null, null, null);
+                                    if(cursor != null){
+                                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                                        cursor.moveToFirst();
+                                        filePath = cursor.getString(column_index);
+                                    }
+                                } finally {
+                                    if (cursor != null) {
+                                        cursor.close();
+                                    }
+                                }
+                            }else{
+                                Log.w(pluginName, "unsupported intent schema: " + uri.getScheme());
+                            }
                             items[i].put("type", type);
                             items[i].put("extension", extension);
-                            //添加真实url
-                            Cursor cursor = null;
-                            try {
-                                String[] proj = { MediaStore.Images.Media.DATA };
-                                cursor = cR.query(uri,  proj, null, null, null);
-                                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                                cursor.moveToFirst();
-                                items[i].put("uri", "file://" + cursor.getString(column_index));
-                            } finally {
-                                if (cursor != null) {
-                                    cursor.close();
-                                }
+                            if(filePath != null){
+                                items[i].put("uri", "file://" + filePath);
                             }
                         }
 
