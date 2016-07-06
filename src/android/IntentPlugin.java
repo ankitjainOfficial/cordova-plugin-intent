@@ -1,4 +1,4 @@
-package com.napolitano.cordova.plugin.intent;
+package com.zyf0330.intent;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
