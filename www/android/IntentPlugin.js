@@ -90,7 +90,7 @@ IntentPlugin.prototype.initShare = function(handle) {
 				type: type
 			};
 		}
-		result.items = intent.clipItems && intent.clipItems.map(function(o) {
+		var items = Array.isArray(intent.clipItems) ? intent.clipItems.map(function(o) {
 					return o.uri ? {
 						mimetype: o.type,
 						extension: o.extension,
@@ -98,7 +98,10 @@ IntentPlugin.prototype.initShare = function(handle) {
 					} : undefined;
 				}).filter(function(o) {
 					return !!o;
-				});
+				}) : [];
+		if(items.length != 0){
+			result.items = items;
+		}
 		handle(null, result);
 	};
 	//只在应用启动时处理
