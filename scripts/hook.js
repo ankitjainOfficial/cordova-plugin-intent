@@ -13,7 +13,7 @@ module.exports = function(ctx) {
 			if (ctx.hook == 'before_plugin_install' || ctx.hook == 'before_build') {
 				if (con.indexOf('android.intent.action.SEND') == -1 && con.indexOf('android.intent.action.SEND_MULTIPLE') == -1 ) {
 					var insert =
-						"            <intent-filter android:label='shareintent'>\n" +
+						"            <intent-filter>\n" +
 						"                <action android:name='android.intent.action.SEND' />\n" +
 						"                <action android:name='android.intent.action.SEND_MULTIPLE'/>\n" +
 						"                <category android:name='android.intent.category.DEFAULT' />\n" +
@@ -35,7 +35,7 @@ module.exports = function(ctx) {
 					}
 				}
 			} else if (ctx.hook == 'before_plugin_uninstall') {
-				con = con.replace(/<intent-filter android:label='shareintent'>[\sa-zA-Z:='"./<>_*]*<\/intent-filter>\n?/, '');
+				con = con.replace(/<intent-filter>[\sa-zA-Z:='"./<>_*]*<\/intent-filter>\n?/, '');
 				fs.writeFile(filepath, con, { flag: 'w+' }, function(err) {
 						if (err) {
 							deferral.reject(err);
