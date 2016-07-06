@@ -29,7 +29,7 @@
         </config-file>
 
         <js-module src="www/android/IntentPlugin.js" name="IntentPlugin">
-            <clobbers target="IntentPlugin" />
+            <clobbers target="window.plugins.intent" />
         </js-module>
 
         <source-file src="src/android/IntentPlugin.java" target-dir="src/com/zyf0330/intent" />
