@@ -47,13 +47,13 @@ IntentPlugin.prototype.initShare = function(handle) {
 				extras = intent.extras;
 		var result;
 		if (type == 'text/plain') {
-			if (intent.clipItems[0].uri) {
+			if (intent.clipItems && intent.clipItems[0].uri) {
 				//文本文件
 				result = {
 					type: 'file'
 				}
 			} else {
-				var text = intent.clipItems[0].text || extras["android.intent.extra.TEXT"];
+				var text = extras["android.intent.extra.TEXT"] || (intent.clipItems ? intent.clipItems[0].text : '');
 				var m = text.match(/\s?(https?:\/\/.+)\s?/);
 				if (m) {
 					//分享链接
