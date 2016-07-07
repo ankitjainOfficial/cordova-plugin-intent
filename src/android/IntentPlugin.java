@@ -1,8 +1,10 @@
 package com.zyf0330.intent;
 
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -152,19 +154,24 @@ public class IntentPlugin extends CordovaPlugin {
                                 ContentResolver cR = cordova.getActivity().getApplicationContext().getContentResolver();
                                 type = cR.getType(uri);
                                 extension = mime.getExtensionFromMimeType(type);
-                                Cursor cursor = null;
+                                //将content转存到cache文件夹。由于google系分享content可能读取不到。
                                 try {
-                                    String[] proj = { MediaStore.Images.Media.DATA };
-                                    cursor = cR.query(uri,  proj, null, null, null);
-                                    if(cursor != null){
-                                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                                        cursor.moveToFirst();
-                                        filePath = cursor.getString(column_index);
+                                    InputStream is = cR.openInputStream(uri);
+                                    String dirName = webView.getContext().getCacheDir() + "/intent-save";
+                                    createOrCleanDir(dirName);
+                                    File file = new File(new File(dirName), new Date().getTime() + i + "." + extension);
+                                    FileOutputStream fos = new FileOutputStream(file);
+                                    while(is.available() > 0){
+                                        byte[] b = new byte[1024];
+                                        is.read(b);
+                                        fos.write(b);
                                     }
-                                } finally {
-                                    if (cursor != null) {
-                                        cursor.close();
-                                    }
+                                    fos.close();
+                                    filePath = file.getPath();
+                                } catch (FileNotFoundException e) {
+                                    Log.e(pluginName, "Content stream is not valid file");
+                                } catch (IOException e) {
+                                    Log.e(pluginName, "Content fails to save as file");
                                 }
                             }else{
                                 Log.w(pluginName, "unsupported intent schema: " + uri.getScheme());
@@ -274,6 +281,18 @@ public class IntentPlugin extends CordovaPlugin {
 
             context.sendPluginResult(new PluginResult(PluginResult.Status.INVALID_ACTION));
             return false;
+        }
+    }
+    private void createOrCleanDir(final String downloadDir) throws IOException {
+        final File dir = new File(downloadDir);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("CREATE_DIRS_FAILED");
+            }
+        } else {
+            for (File f : dir.listFiles()) {
+                f.delete();
+            }
         }
     }
 }
