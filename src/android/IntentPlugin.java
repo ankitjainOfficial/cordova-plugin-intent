@@ -199,6 +199,10 @@ public class IntentPlugin extends CordovaPlugin {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 if(items != null) {
                     intentJSON.put("clipItems", new JSONArray(items));
+                    int mtc = clipData.getDescription().getMimeTypeCount();
+                    if(mtc >= 1){
+                        intentJSON.put("descriptionType", clipData.getDescription().getMimeType(0));
+                    }
                 }
             }
 

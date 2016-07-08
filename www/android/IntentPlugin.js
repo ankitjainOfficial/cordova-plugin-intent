@@ -6,10 +6,10 @@ IntentPlugin.prototype.getCordovaIntent = function(successCallback, failureCallb
 	'use strict';
 
 	return cordova.exec(
-			successCallback,
-			failureCallback,
-			"IntentPlugin",
-			"getCordovaIntent", []
+		successCallback,
+		failureCallback,
+		"IntentPlugin",
+		"getCordovaIntent", []
 	);
 };
 
@@ -17,10 +17,10 @@ IntentPlugin.prototype.setNewIntentHandler = function(method) {
 	'use strict';
 
 	cordova.exec(
-			method,
-			null,
-			"IntentPlugin",
-			"setNewIntentHandler", [method]
+		method,
+		null,
+		"IntentPlugin",
+		"setNewIntentHandler", [method]
 	);
 };
 
@@ -28,10 +28,10 @@ IntentPlugin.prototype.getRealPathFromContentUrl = function(uri, successCallback
 	'use strict'
 
 	cordova.exec(
-			successCallback,
-			failureCallback,
-			'IntentPlugin',
-			'getRealPathFromContentUrl', [uri]
+		successCallback,
+		failureCallback,
+		'IntentPlugin',
+		'getRealPathFromContentUrl', [uri]
 	);
 
 }
@@ -43,30 +43,29 @@ IntentPlugin.prototype.initShare = function(handle) {
 		if (intent.action != 'android.intent.action.SEND' && intent.action != 'android.intent.action.SEND_MULTIPLE') {
 			return;
 		}
-		var type = intent.type,
-				extras = intent.extras;
+		var type = intent.type, extras = intent.extras, descriptionType = intent.descriptionType;
 		var result;
 		if (type == 'text/plain') {
-			if (intent.clipItems && intent.clipItems[0].uri) {
-				//文本文件
-				result = {
-					type: 'file'
-				}
-			} else {
-				var text = extras["android.intent.extra.TEXT"] || (intent.clipItems ? intent.clipItems[0].text : '');
+			if(descriptionType == 'text/uri-list'){
+				//分享链接
+				var text = extras["android.intent.extra.TEXT"];
 				var m = text.match(/\s?(https?:\/\/.+)\s?/);
-				if (m) {
-					//分享链接
+				result = {
+					type: 'url',
+					subject: extras['android.intent.extra.SUBJECT'],
+					value: !!m ? m[1] : null
+				};
+			}else{
+				if (intent.clipItems && intent.clipItems[0].uri) {
+					//文本文件
 					result = {
-						type: 'url',
-						subject: extras['android.intent.extra.SUBJECT'],
-						value: m[1]
-					};
+						type: 'file'
+					}
 				} else {
 					//普通文字
 					result = {
 						type: 'text',
-						value: text
+						value: extras["android.intent.extra.TEXT"] || (intent.clipItems ? intent.clipItems[0].text : '')
 					};
 				}
 			}
@@ -91,14 +90,14 @@ IntentPlugin.prototype.initShare = function(handle) {
 			};
 		}
 		var items = Array.isArray(intent.clipItems) ? intent.clipItems.map(function(o) {
-					return o.uri ? {
-						mimetype: o.type,
-						extension: o.extension,
-						uri: o.uri
-					} : undefined;
-				}).filter(function(o) {
-					return !!o;
-				}) : [];
+			return o.uri ? {
+				mimetype: o.type,
+				extension: o.extension,
+				uri: o.uri
+			} : undefined;
+		}).filter(function(o) {
+			return !!o;
+		}) : [];
 		if(items.length != 0){
 			result.items = items;
 		}
